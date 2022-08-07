@@ -26,39 +26,37 @@ const { RedisStorage } = require('puregram-redis-storage');
 const telegram = Telegram.fromToken(process.env.TOKEN);
 
 function startBot({ updates }) {
-    const storage = new RedisStorage({
-        // redis: ioRedisClient,
-        redis: {
-            host: '127.0.0.1',
-        },
-        keyPrefix: 'puregram:session:',
-        // ttl: 12 * 3600,
-    });
+  const storage = new RedisStorage({
+    // redis: ioRedisClient,
+    redis: {
+      host: '127.0.0.1',
+      port: 6379
+    },
+    keyPrefix: 'puregram:session:'
+    // ttl: 12 * 3600
+  });
 
-    const sessionManager = new SessionManager({
-        storage,
-        getStorageKey: (ctx) =>
-            ctx.userId
-                ? `${ctx.userId}:${ctx.userId}`
-                : `${ctx.peerId}:${ctx.senderId}`,
-    });
+  const sessionManager = new SessionManager({
+    storage,
+    getStorageKey: (context) => `${context.chat.id}:${context.from?.id ?? 0}`
+  });
 
-    updates.on('message', sessionManager.middleware);
+  updates.on('message', sessionManager.middleware);
 
-    updates.on('message_new', (ctx, next) => {
-        if (context.text !== '/counter') {
-            return next();
-        }
-        if (ctx.isOutbox) return;
+  updates.on('message', (context, next) => {
+    if (context.text !== '/counter') {
+      return next();
+    }
+    if (context.isOutbox) return;
 
-        const { session } = ctx;
+    const { session } = context;
 
-        session.counter = (session.counter || 0) + 1;
+    session.counter = (session.counter || 0) + 1;
 
-        ctx.send(`You turned to the bot (${session.counter}) times`);
-    });
+    context.send(`You turned to the bot (${session.counter}) times`);
+  });
 
-    updates.start().catch(console.error);
+  updates.startPolling().catch(console.error);
 }
 
 // ...
