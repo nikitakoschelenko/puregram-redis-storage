@@ -1,6 +1,6 @@
 {
   "name": "puregram-redis-storage",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "✈️ Redis storage for @puregram/session module",
   "keywords": [
     "nodejs",
