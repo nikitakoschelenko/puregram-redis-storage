@@ -3,7 +3,7 @@ import createDebug from 'debug';
 import Redis, { RedisOptions } from 'ioredis';
 
 export type IRedisStorageOptions = {
-  redis?: Omit<RedisOptions, 'keyPrefix'> | Redis;
+  redis?: string | Omit<RedisOptions, 'keyPrefix'> | Redis;
   ttl?: number;
   keyPrefix?: RedisOptions['keyPrefix'];
 };
@@ -21,6 +21,10 @@ export class RedisStorage implements SessionStorage {
 
     if (options.redis instanceof Redis) {
       this.client = options.redis;
+    } else if (typeof options.redis === 'string') {
+      this.client = new Redis(options.redis, {
+        keyPrefix: options.keyPrefix || 'puregram:session:'
+      });
     } else {
       this.client = new Redis({
         ...options.redis,
