@@ -60,6 +60,11 @@ export class RedisStorage implements SessionStorage {
     return result === 'OK';
   }
 
+  public async has(key: string): Promise<boolean> {
+    const result = await this.client.exists(key);
+    return result === 1;
+  }
+
   public async delete(key: string): Promise<boolean> {
     debug('delete session', key);
 
